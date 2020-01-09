@@ -1,13 +1,13 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
+
+const Person = require('./models/person') 
 
 const cors = require('cors')
 app.use(cors())
 
 app.use(express.static('build'))
-
-const Person = require('./models/person') 
-
 
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
@@ -71,6 +71,9 @@ app.get('/info', (request, response) => {
   })
 })
 
+//---ADD person to Coctact---//
+
+
 // app.post('/api/persons', (req, res) => {
 //   const generate_id = Math.floor(Math.random()*1000)
 //   const body = req.body
@@ -95,16 +98,11 @@ app.get('/info', (request, response) => {
 // })
 
 
-app.post('/api/persons', (req, res,next) => {
-  const body = req.body
+app.post('/api/persons', (request, response ,next) => {
+  const body = request.body
   if (!body.number && !body.name) {
-      return res.status(400).json({ error:"name or number is missing"})
+      return response.status(400).json({ error:"name or number is missing"})
   }
-
-  Person.find({name:body.name}).then(result=>{
-      console.log(result)
-      return res.status(400).json({error:'name must be unique!'})
-  })
 
   const person_to_save = new Person({
       name: body.name,
@@ -113,12 +111,12 @@ app.post('/api/persons', (req, res,next) => {
 
   person_to_save.save()
   .then(savePerson => {
-        res.json(savePerson.toJSON())
+        return response.json(savePerson.toJSON())
       })
-      .catch((err) => next(err))
+      .catch((err) => console.log(message.err,"********"))
 })
 
-//---DELETE person by ID---
+//---DELETE person by ID---//
 
 // app.delete('/api/persons/:id', (req, res) => {
 //   const id = Number(req.params.id)
@@ -135,7 +133,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
       .catch((err) => next(err))
 })
 
-//---******************UPDATE person to Phone-book************************---
+//---UPDATE person to Phone-book-----//
 
 app.put('/api/persons/:id',(req,res,next)=>{
   const body = req.body
@@ -173,7 +171,7 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
